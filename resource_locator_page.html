@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nearby Support Resources - SafeHaven</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+        }
+        header {
+            background: #2b3a55;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .quick-exit {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: red;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 999;
+        }
+        h2 {
+            text-align: center;
+            color: #2b3a55;
+            margin-top: 20px;
+        }
+        .container {
+            padding: 20px;
+            max-width: 900px;
+            margin: auto;
+        }
+        .resource-box {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .resource-box h3 {
+            margin: 0;
+            color: #1f2a40;
+        }
+        .resource-box p {
+            margin: 8px 0;
+            color: #333;
+        }
+        .btn-locate {
+            padding: 10px 20px;
+            background: #2b3a55;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quick-exit" onclick="window.location.href='https://www.weather.com'">Quick Exit</div>
+
+    <header>
+        <h1>Nearby Support Resources</h1>
+        <p>Find the closest help centers near you</p>
+    </header>
+
+    <button class="btn-locate" onclick="getLocation()">📍 Find My Location</button>
+
+    <h2>Available Support Centers</h2>
+
+    <div class="container" id="resourceList">
+        <!-- Dynamic list populated by JS -->
+    </div>
+
+    <script>
+        const resources = [
+            { name: "City Women's Shelter", distance: "2.1 km", contact: "+91 9876543210", address: "MG Road, Near Metro Station" },
+            { name: "SafeHands Counselling Center", distance: "3.4 km", contact: "+91 9988776655", address: "Park Street, Block A" },
+            { name: "24/7 Domestic Violence Helpline", distance: "Online", contact: "181", address: "Nationwide" },
+            { name: "Legal Aid Support Office", distance: "5.2 km", contact: "+91 8899001122", address: "Court Circle, Sector 5" }
+        ];
+
+        function getLocation() {
+            document.getElementById("resourceList").innerHTML = "<p>Fetching your location…</p>";
+            setTimeout(loadResources, 1000);
+        }
+
+        function loadResources() {
+            let html = "";
+            resources.forEach(r => {
+                html += `
+                <div class="resource-box">
+                    <h3>${r.name}</h3>
+                    <p><strong>Distance:</strong> ${r.distance}</p>
+                    <p><strong>Contact:</strong> ${r.contact}</p>
+                    <p><strong>Address:</strong> ${r.address}</p>
+                </div>`;
+            });
+
+            document.getElementById("resourceList").innerHTML = html;
+        }
+    </script>
+
+</body>
+</html>

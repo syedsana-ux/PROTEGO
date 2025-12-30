@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Safe Chat - SafeHaven</title>
+  <style>
+    :root{
+      --bg:#f3f6fb;
+      --card:#ffffff;
+      --primary:#2b3a55;
+      --muted:#e8e8e8;
+      --user:#d1e3ff;
+      --text:#222;
+    }
+    *{box-sizing:border-box}
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing:antialiased;
+    }
+
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 18px 12px;
+      text-align: center;
+    }
+
+    .quick-exit {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      background: #c0392b;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      z-index: 1200;
+    }
+
+    .chat-container {
+      max-width: 760px;
+      margin: 22px auto;
+      background: var(--card);
+      padding: 18px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(30,40,60,0.06);
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .warning {
+      background:#fff3f3;
+      border-left:4px solid #e25858;
+      padding:10px 12px;
+      border-radius:8px;
+      color:#333;
+      font-size:14px;
+    }
+
+    .messages {
+      min-height:260px;
+      max-height:420px;
+      overflow-y:auto;
+      padding:12px;
+      border-radius:10px;
+      border:1px solid #e6e6e6;
+      background:#fafafa;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .msg{
+      display:inline-block;
+      padding:10px 14px;
+      border-radius:12px;
+      word-break:break-word;
+      max-width:72%;
+      line-height:1.35;
+      font-size:15px;
+    }
+
+    .msg.bot { background: var(--muted); align-self:flex-start; }
+    .msg.user{ background: var(--user); align-self:flex-end; }
+
+    .typing-indicator{
+      display:none;
+      align-self:flex-start;
+      padding:6px 10px;
+      border-radius:12px;
+      background:transparent;
+      height:24px;
+      display:flex;
+      gap:6px;
+      align-items:center;
+    }
+    .typing-dot{
+      width:7px; height:7px; border-radius:50%; background:#777; opacity:0.5;
+      animation: blink 1s infinite;
+    }
+    .typing-dot:nth-child(2){ animation-delay:0.18s }
+    .typing-dot:nth-child(3){ animation-delay:0.36s }
+    @keyframes blink{ 0%,60%,100%{opacity:0.25} 30%{opacity:0.95} }
+
+    .input-area{ display:flex; gap:8px; }
+    .input-area input{
+      flex:1; padding:10px 12px; border-radius:10px; border:1px solid #bfc6cf;
+      font-size:15px;
+    }
+    .input-area button{
+      padding:10px 14px; background:var(--primary); color:#fff; border:none; border-radius:10px; cursor:pointer;
+    }
+
+    /* Dark mode */
+    body.dark-mode{ background:#0f0f11; color:#e8e8e8; }
+    .chat-container.dark-mode{ background:#161616; box-shadow:none; }
+    .messages.dark-mode{ background:#0b0b0b; border-color:#262626; }
+    .msg.bot.dark-mode{ background:#2b2b2b; color:#e6e6e6; }
+    .msg.user.dark-mode{ background:#373737; color:#e6e6e6; }
+    .dark-toggle{ position:fixed; left:14px; bottom:14px; z-index:1200; padding:8px 12px; border-radius:8px; background:var(--primary); color:#fff; cursor:pointer; }
+    .panic-clear{ position:fixed; right:14px; bottom:14px; z-index:1200; padding:8px 12px; border-radius:8px; background:#c0392b; color:#fff; cursor:pointer; }
+
+    @media (max-width:600px){
+      .chat-container{ margin:14px; border-radius:10px; padding:14px; }
+      .messages{ min-height:200px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="quick-exit" onclick="window.location.href='https://www.google.com'">Quick Exit</div>
+
+  <header>
+    <h1 style="margin:0;font-size:20px">Safe Chat</h1>
+    <div style="font-size:13px;opacity:0.95">You are safe here — speak freely.</div>
+  </header>
+
+  <main class="chat-container" id="chatContainer">
+    <div class="warning">
+      <strong>⚠️ Your chats are not stored.</strong> For safety, conversations clear when you navigate away or use Panic Clear.
+    </div>
+
+    <section class="messages" id="chatBox" aria-live="polite">
+      <!-- initial bot greeting -->
+      <div class="msg bot">Hello — I'm here to support you. How are you feeling today?</div>
+
+      <!-- typing indicator (kept in DOM) -->
+      <div class="typing-indicator" id="typingIndicator" aria-hidden="true">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </section>
+
+    <div class="input-area" role="form" aria-label="Chat input">
+      <input id="messageInput" type="text" placeholder="Type your message..." autocomplete="off" />
+      <button id="sendBtn" type="button">Send</button>
+    </div>
+  </main>
+
+  <button class="dark-toggle" id="darkToggle" aria-pressed="false">🌙 Dark</button>
+  <button class="panic-clear" id="panicClear">⚠ Panic Clear</button>
+
+  <script>
+    // Anonymous ID (not stored anywhere)
+    const anonID = 'USER-' + Math.floor(Math.random() * 90000 + 10000);
+    console.log('Anonymous ID:', anonID);
+
+    const chatBox = document.getElementById('chatBox');
+    const chatContainer = document.getElementById('chatContainer');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const typingIndicator = document.getElementById('typingIndicator');
+    const darkToggle = document.getElementById('darkToggle');
+    const panicClearBtn = document.getElementById('panicClear');
+
+    // Helper: create message and insert before typingIndicator
+    function addChatMessage(text, role='bot') {
+      const el = document.createElement('div');
+      el.className = 'msg ' + (role === 'user' ? 'user' : 'bot');
+      el.textContent = text;
+
+      // If dark mode is active, keep message styled for dark mode
+      if (document.body.classList.contains('dark-mode')) {
+        el.classList.add('dark-mode');
+      }
+
+      // insert before typingIndicator so typing indicator stays at bottom
+      chatBox.insertBefore(el, typingIndicator);
+      // scroll to bottom
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Show typing indicator and optionally add bot reply afterwards
+    function showTypingWithReply(replyText, delay = 1400) {
+      typingIndicator.style.display = 'flex';
+      // ensure scroll shows indicator
+      chatBox.scrollTop = chatBox.scrollHeight;
+      setTimeout(() => {
+        typingIndicator.style.display = 'none';
+        if (replyText) addChatMessage(replyText, 'bot');
+      }, delay);
+    }
+
+    // Send user message
+    function sendMessage() {
+      const text = messageInput.value.trim();
+      if (!text) return;
+      addChatMessage(text, 'user');
+      messageInput.value = '';
+      // simulate counsellor typing then reply
+      showTypingWithReply("I'm here with you. Tell me more about what you're going through.", 1400);
+    }
+
+    // initial automated follow-up once page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      // small delay then typing animation and a short supportive prompt
+      setTimeout(() => {
+        showTypingWithReply("I'm here to help. Please tell me anything you're comfortable sharing.", 1600);
+      }, 600);
+    });
+
+    // Send on button click or Enter key
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // Toggle dark mode - keep future messages consistent
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      chatContainer.classList.toggle('dark-mode');
+      chatBox.classList.toggle('dark-mode');
+      // toggle existing messages
+      document.querySelectorAll('.msg').forEach(m => m.classList.toggle('dark-mode'));
+      const pressed = document.body.classList.contains('dark-mode');
+      darkToggle.textContent = pressed ? '☀ Light' : '🌙 Dark';
+      darkToggle.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+    }
+    darkToggle.addEventListener('click', toggleDarkMode);
+
+    // Panic Clear: clear message elements but keep typingIndicator in DOM
+    function panicClear() {
+      // remove only elements with class 'msg'
+      const msgs = Array.from(chatBox.querySelectorAll('.msg'));
+      msgs.forEach(n => n.remove());
+      // re-add a short safety notice message (bot) after clearing
+      addChatMessage('Chat cleared. If you are in immediate danger, call your local emergency number.', 'bot');
+      // ensure typingIndicator is hidden
+      typingIndicator.style.display = 'none';
+      messageInput.value = '';
+      // optionally, you could redirect to a decoy page here:
+      // window.location.href = 'https://www.weather.com';
+    }
+    panicClearBtn.addEventListener('click', panicClear);
+
+    // Accessibility: focus input on page load
+    window.addEventListener('load', () => { messageInput.focus(); });
+  </script>
+</body>
+</html>

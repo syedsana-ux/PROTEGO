@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Abuse - Portego</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+        }
+        header {
+            background: #2b3a55;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #2b3a55;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-top: 12px;
+            font-weight: bold;
+            color: #2b3a55;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+        textarea {
+            height: 120px;
+        }
+        .btn-submit {
+            background: #2b3a55;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .quick-exit {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: red;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quick-exit" onclick="window.location.href='https://www.google.com'">Quick Exit</div>
+
+    <header>
+        <h1>Report Abuse</h1>
+        <p>Your safety is our priority. This report is confidential.</p>
+    </header>
+
+    <div class="container">
+        <h2>Report Form</h2>
+        
+        <form>
+            <label>Your Name (Optional)</label>
+            <input type="text" placeholder="Enter your name or leave blank for anonymous">
+
+            <label>Contact Email or Phone (Optional)</label>
+            <input type="text" placeholder="We will only contact you if needed">
+
+            <label>Type of Abuse</label>
+            <select>
+                <option>Select an option</option>
+                <option>Physical Abuse</option>
+                <option>Emotional Abuse</option>
+                <option>Financial Abuse</option>
+                <option>Sexual Abuse</option>
+                <option>Digital/Online Abuse</option>
+                <option>Other</option>
+            </select>
+
+            <label>Describe the Incident</label>
+            <textarea placeholder="Please provide as many details as you safely can..."></textarea>
+
+            <label>Location of Incident</label>
+            <input type="text" placeholder="City, Area or Landmark">
+
+            <label>Is the victim currently in danger?</label>
+            <select>
+                <option>Select one</option>
+                <option>Yes</option>
+                <option>No</option>
+                <option>Not Sure</option>
+            </select>
+
+            <button type="submit" class="btn-submit">Submit Report</button>
+        </form>
+    </div>
+
+</body>
+</html>
